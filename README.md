@@ -1,4 +1,4 @@
-# Serial port to named pipes connector
+# Serial port to named pipe connector
 
 Serial port (e.g., COM1) to named pipe (e.g., \\.\pipe\com1) connector
 

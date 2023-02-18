@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{00DCEDFC-CDC
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPort2NamedPipesConnector", "src\SerialPort2NamedPipesConnector\SerialPort2NamedPipesConnector.csproj", "{DDA94C2C-D992-4570-99A5-C4196C302D12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerialPort2NamedPipeConnector", "src\SerialPort2NamedPipeConnector\SerialPort2NamedPipeConnector.csproj", "{5952E91D-C9E6-45A8-9B48-08253B3424C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,16 +18,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DDA94C2C-D992-4570-99A5-C4196C302D12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDA94C2C-D992-4570-99A5-C4196C302D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DDA94C2C-D992-4570-99A5-C4196C302D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DDA94C2C-D992-4570-99A5-C4196C302D12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5952E91D-C9E6-45A8-9B48-08253B3424C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5952E91D-C9E6-45A8-9B48-08253B3424C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5952E91D-C9E6-45A8-9B48-08253B3424C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5952E91D-C9E6-45A8-9B48-08253B3424C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{DDA94C2C-D992-4570-99A5-C4196C302D12} = {94CC08F1-8110-43C9-B4DE-F9D3FC4590BA}
+		{5952E91D-C9E6-45A8-9B48-08253B3424C7} = {94CC08F1-8110-43C9-B4DE-F9D3FC4590BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F2F1A5DC-A869-4CF1-B624-375D49991346}
