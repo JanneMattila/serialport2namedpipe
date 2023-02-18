@@ -36,8 +36,6 @@ public class Worker : BackgroundService
             _logger.LogInformation("Found serial port: {SerialPortName}", serialPortName);
         }
 
-        _serialPortReadThread = new Thread(SerialPortReadThread);
-
         _serialPort = new SerialPort
         {
             PortName = _serialPortName,
@@ -48,9 +46,14 @@ public class Worker : BackgroundService
         };
 
         _serialPort.Open();
+        _serialPortReadThread = new Thread(SerialPortReadThread);
 
         _namedPipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut,
-            NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte);
+            NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.None)
+        {
+            ReadTimeout = 1000,
+            WriteTimeout = 1000
+        };
 
         _namedPipeReadThread = new Thread(NamedPipeReadThread);
 
