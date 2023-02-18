@@ -34,3 +34,11 @@ VMName         Name  Path
 Home assistant COM 1 \\.\pipe\com1
 Home assistant COM 2
 ```
+
+```powershell
+sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
+```
+
+### Links
+
+[Create a Windows Service using BackgroundService](https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service)
