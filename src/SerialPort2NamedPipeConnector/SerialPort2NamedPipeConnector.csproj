@@ -20,5 +20,6 @@
 	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="7.0.3" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
+	<PackageReference Include="System.IO.Ports" Version="7.0.0" />
   </ItemGroup>
 </Project>

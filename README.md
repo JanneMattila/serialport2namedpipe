@@ -42,3 +42,5 @@ sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
 ### Links
 
 [Create a Windows Service using BackgroundService](https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service)
+
+[SerialPort Class](https://learn.microsoft.com/en-us/dotnet/api/system.io.ports.serialport?view=dotnet-plat-ext-7.0)
