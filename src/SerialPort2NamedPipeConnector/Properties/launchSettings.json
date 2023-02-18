@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "SerialPort2NamedPipeConnector": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

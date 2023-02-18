@@ -1,2 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+using SerialPort2NamedPipeConnector;
+
+IHost host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =>
+    {
+        services.AddHostedService<Worker>();
+    })
+    .Build();
+
+host.Run();
