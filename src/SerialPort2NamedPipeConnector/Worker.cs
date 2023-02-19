@@ -45,15 +45,18 @@ public class Worker : BackgroundService
             WriteTimeout = 10000
         };
 
+        _logger.LogInformation("Opening serial port");
         _serialPort.Open();
-        _serialPortReadThread = new Thread(SerialPortReadThread);
-        _serialPortReadThread.Start();
+        _logger.LogInformation("Serial port opened");
 
         _namedPipe = new NamedPipeClientStream(".", _namedPipeName);
 
-        _logger.LogInformation("Waiting for connection");
+        _logger.LogInformation("Connecting with named pipe");
         _namedPipe.Connect();
-        _logger.LogInformation("Connected");
+        _logger.LogInformation("Connected with named pipe");
+
+        _serialPortReadThread = new Thread(SerialPortReadThread);
+        _serialPortReadThread.Start();
 
         _namedPipeReadThread = new Thread(NamedPipeReadThread);
         _namedPipeReadThread.Start();
@@ -80,14 +83,14 @@ public class Worker : BackgroundService
                 var bytes = _serialPort.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
-                    _logger.LogDebug("Received {Bytes} from serial port", bytes);
+                    _logger.LogInformation("Received {Bytes} from serial port", bytes);
 
                     _namedPipe.Write(buffer, 0, bytes);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading from serial port");
+                //_logger.LogError(ex, "Error reading from serial port");
             }
         }
     }
@@ -102,7 +105,7 @@ public class Worker : BackgroundService
                 var bytes = _namedPipe.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
-                    _logger.LogDebug("Received {Bytes} from named pipe", bytes);
+                    _logger.LogInformation("Received {Bytes} from named pipe", bytes);
 
                     _serialPort.Write(buffer, 0, bytes);
                 }
