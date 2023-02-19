@@ -41,6 +41,8 @@ public class Worker : BackgroundService
             PortName = _serialPortName,
             BaudRate = _baudRate,
             Handshake = Handshake.None,
+            StopBits = StopBits.One,
+            Parity = Parity.None,
             ReadTimeout = 10000,
             WriteTimeout = 10000
         };
@@ -49,7 +51,7 @@ public class Worker : BackgroundService
         _serialPort.Open();
         _logger.LogInformation("Serial port opened");
 
-        _namedPipe = new NamedPipeClientStream(".", _namedPipeName);
+        _namedPipe = new NamedPipeClientStream(".", _namedPipeName, PipeDirection.InOut, PipeOptions.WriteThrough);
 
         _logger.LogInformation("Connecting with named pipe");
         _namedPipe.Connect();
@@ -75,7 +77,7 @@ public class Worker : BackgroundService
 
     public void SerialPortReadThread()
     {
-        var buffer = new byte[1024];
+        var buffer = new byte[32];
         while (_isRunning)
         {
             try
@@ -83,21 +85,22 @@ public class Worker : BackgroundService
                 var bytes = _serialPort.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
-                    _logger.LogInformation("Received {Bytes} from serial port", bytes);
+                    _logger.LogInformation("Received {Bytes} bytes from serial port", bytes);
 
                     _namedPipe.Write(buffer, 0, bytes);
+                    _namedPipe.Flush();
                 }
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error reading from serial port");
+                _logger.LogDebug(ex, "Error reading from serial port");
             }
         }
     }
 
     public void NamedPipeReadThread()
     {
-        var buffer = new byte[1024];
+        var buffer = new byte[32];
         while (_isRunning)
         {
             try
@@ -105,8 +108,7 @@ public class Worker : BackgroundService
                 var bytes = _namedPipe.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
-                    _logger.LogInformation("Received {Bytes} from named pipe", bytes);
-
+                    _logger.LogInformation("Received {Bytes} bytes from named pipe", bytes);
                     _serialPort.Write(buffer, 0, bytes);
                 }
             }
