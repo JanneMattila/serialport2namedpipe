@@ -14,7 +14,7 @@ public class Worker : BackgroundService
     private Thread _serialPortReadThread;
     private bool _isRunning = true;
 
-    private NamedPipeServerStream _namedPipe;
+    private NamedPipeClientStream _namedPipe;
     private Thread _namedPipeReadThread;
 
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
@@ -22,7 +22,7 @@ public class Worker : BackgroundService
         _logger = logger;
         _serialPortName = configuration.GetValue<string>("SerialPort") ?? "COM1";
         _baudRate = configuration.GetValue("BaudRate", 9600);
-        _namedPipeName = configuration.GetValue<string>("NamedPipe") ?? "\\\\.\\pipe\\com1";
+        _namedPipeName = configuration.GetValue<string>("NamedPipe") ?? "com1";
     }
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -41,21 +41,22 @@ public class Worker : BackgroundService
             PortName = _serialPortName,
             BaudRate = _baudRate,
             Handshake = Handshake.None,
-            ReadTimeout = 1000,
-            WriteTimeout = 1000
+            ReadTimeout = 10000,
+            WriteTimeout = 10000
         };
 
         _serialPort.Open();
         _serialPortReadThread = new Thread(SerialPortReadThread);
+        _serialPortReadThread.Start();
 
-        _namedPipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut,
-            NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.None)
-        {
-            ReadTimeout = 1000,
-            WriteTimeout = 1000
-        };
+        _namedPipe = new NamedPipeClientStream(".", _namedPipeName);
+
+        _logger.LogInformation("Waiting for connection");
+        _namedPipe.Connect();
+        _logger.LogInformation("Connected");
 
         _namedPipeReadThread = new Thread(NamedPipeReadThread);
+        _namedPipeReadThread.Start();
 
         return base.StartAsync(cancellationToken);
     }
@@ -65,7 +66,7 @@ public class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("Worker running at: {Time}", DateTimeOffset.Now);
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
 
@@ -79,10 +80,15 @@ public class Worker : BackgroundService
                 var bytes = _serialPort.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
+                    _logger.LogDebug("Received {Bytes} from serial port", bytes);
+
                     _namedPipe.Write(buffer, 0, bytes);
                 }
             }
-            catch (TimeoutException) { }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading from serial port");
+            }
         }
     }
 
@@ -96,19 +102,21 @@ public class Worker : BackgroundService
                 var bytes = _namedPipe.Read(buffer, 0, buffer.Length);
                 if (bytes > 0)
                 {
+                    _logger.LogDebug("Received {Bytes} from named pipe", bytes);
+
                     _serialPort.Write(buffer, 0, bytes);
                 }
             }
-            catch (TimeoutException) { }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading from named pipe");
+            }
         }
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
         _isRunning = false;
-
-        _serialPortReadThread.Join(5000);
-        _namedPipeReadThread.Join(5000);
 
         _serialPort.Close();
         _namedPipe.Close();
