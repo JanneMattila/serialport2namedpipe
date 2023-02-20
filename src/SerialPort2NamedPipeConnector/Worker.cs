@@ -16,7 +16,6 @@ public class Worker : BackgroundService
 
     private NamedPipeClientStream _namedPipe;
     private Thread _namedPipeReadThread;
-
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
         _logger = logger;
@@ -43,8 +42,8 @@ public class Worker : BackgroundService
             Handshake = Handshake.None,
             StopBits = StopBits.One,
             Parity = Parity.None,
-            ReadTimeout = 10000,
-            WriteTimeout = 10000
+            ReadTimeout = SerialPort.InfiniteTimeout,
+            WriteTimeout = SerialPort.InfiniteTimeout
         };
 
         _logger.LogInformation("Opening serial port");
@@ -77,19 +76,16 @@ public class Worker : BackgroundService
 
     public void SerialPortReadThread()
     {
-        var buffer = new byte[32];
+        var buffer = new byte[1024];
         while (_isRunning)
         {
             try
             {
                 var bytes = _serialPort.Read(buffer, 0, buffer.Length);
-                if (bytes > 0)
-                {
-                    _logger.LogInformation("Received {Bytes} bytes from serial port", bytes);
-
-                    _namedPipe.Write(buffer, 0, bytes);
-                    _namedPipe.Flush();
-                }
+                var data = Convert.ToHexString(buffer, 0, bytes);
+                _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}", bytes, data);
+                _namedPipe.Write(buffer, 0, bytes);
+                _namedPipe.Flush();
             }
             catch (Exception ex)
             {
@@ -100,17 +96,15 @@ public class Worker : BackgroundService
 
     public void NamedPipeReadThread()
     {
-        var buffer = new byte[32];
+        var buffer = new byte[1024];
         while (_isRunning)
         {
             try
             {
                 var bytes = _namedPipe.Read(buffer, 0, buffer.Length);
-                if (bytes > 0)
-                {
-                    _logger.LogInformation("Received {Bytes} bytes from named pipe", bytes);
-                    _serialPort.Write(buffer, 0, bytes);
-                }
+                var data = Convert.ToHexString(buffer, 0, bytes);
+                _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}", bytes, data);
+                _serialPort.Write(buffer, 0, bytes);
             }
             catch (Exception ex)
             {
