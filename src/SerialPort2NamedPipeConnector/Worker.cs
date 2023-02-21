@@ -16,6 +16,7 @@ public class Worker : BackgroundService
 
     private NamedPipeClientStream _namedPipe;
     private Thread _namedPipeReadThread;
+
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
         _logger = logger;
@@ -50,7 +51,7 @@ public class Worker : BackgroundService
         _serialPort.Open();
         _logger.LogInformation("Serial port opened");
 
-        _namedPipe = new NamedPipeClientStream(".", _namedPipeName, PipeDirection.InOut, PipeOptions.WriteThrough);
+        _namedPipe = new NamedPipeClientStream(".", _namedPipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
         _logger.LogInformation("Connecting with named pipe");
         _namedPipe.Connect();

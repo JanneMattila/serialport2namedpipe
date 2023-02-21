@@ -53,3 +53,11 @@ sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
 [Configure UART/COM in Linux using Hyper-V Generation 2 VM](https://superuser.com/questions/1032490/configure-uart-com-in-linux-using-hyper-v-generation-2-vm)
 
 [Hyper-V Serial port - Step-By-step guide](https://www.eltima.com/com-port-in-virtual-machine/hyperv-serial-port-passthrough/)
+
+[deCONZ Serial Protocol](https://github.com/dresden-elektronik/deconz-serial-protocol)
+
+[deCONZ — Serial Protocol](https://deconz.dresden-elektronik.de/raspbian/deCONZ-Serial-Protocol-en_1.21.pdf)
+
+[Serial Line Internet Protocol](https://en.wikipedia.org/wiki/Serial_Line_Internet_Protocol)
+
+[Named pipes hang when written asynchronously w/o async flag](https://github.com/dotnet/runtime/issues/31390)
