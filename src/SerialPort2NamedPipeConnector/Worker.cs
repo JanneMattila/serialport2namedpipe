@@ -17,6 +17,9 @@ public class Worker : BackgroundService
     private NamedPipeClientStream _namedPipe;
     private Thread _namedPipeReadThread;
 
+    private ulong _serialPortBytesRead = 0;
+    private ulong _namedPipeBytesRead = 0;
+
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
         _logger = logger;
@@ -47,15 +50,10 @@ public class Worker : BackgroundService
             WriteTimeout = SerialPort.InfiniteTimeout
         };
 
-        _logger.LogInformation("Opening serial port");
-        _serialPort.Open();
-        _logger.LogInformation("Serial port opened");
-
         _namedPipe = new NamedPipeClientStream(".", _namedPipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-        _logger.LogInformation("Connecting with named pipe");
-        _namedPipe.Connect();
-        _logger.LogInformation("Connected with named pipe");
+        VerifySerialPortConnection();
+        VerifyNamedPipeConnection();
 
         _serialPortReadThread = new Thread(SerialPortReadThread);
         _serialPortReadThread.Start();
@@ -66,12 +64,35 @@ public class Worker : BackgroundService
         return base.StartAsync(cancellationToken);
     }
 
+    private void VerifySerialPortConnection()
+    {
+        if (!_serialPort.IsOpen)
+        {
+            _logger.LogInformation("Opening serial port");
+            _serialPort.Open();
+            _logger.LogInformation("Serial port opened");
+        }
+    }
+
+    private void VerifyNamedPipeConnection()
+    {
+        if (!_namedPipe.IsConnected)
+        {
+            _logger.LogInformation("Connecting with named pipe");
+            _namedPipe.Connect();
+            _logger.LogInformation("Connected with named pipe");
+        }
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {Time}", DateTimeOffset.Now);
-            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+            _logger.LogInformation("SerialPort2NamedPipeConnector statistics: {Time} - Serial port bytes read: {SerialPortBytesRead} and named pipe bytes read: {NamedPipeBytesRead}",
+                DateTimeOffset.Now, _serialPortBytesRead, _namedPipeBytesRead);
+            _serialPortBytesRead = 0;
+            _namedPipeBytesRead = 0;
+            await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
         }
     }
 
@@ -82,15 +103,23 @@ public class Worker : BackgroundService
         {
             try
             {
+                VerifySerialPortConnection();
                 var bytes = _serialPort.Read(buffer, 0, buffer.Length);
-                var data = Convert.ToHexString(buffer, 0, bytes);
-                _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}", bytes, data);
-                _namedPipe.Write(buffer, 0, bytes);
-                _namedPipe.Flush();
+                if (bytes > 0)
+                {
+                    _serialPortBytesRead += (ulong)bytes;
+                    var data = Convert.ToHexString(buffer, 0, bytes);
+                    _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}", bytes, data);
+
+                    VerifyNamedPipeConnection();
+                    _namedPipe.Write(buffer, 0, bytes);
+                    _namedPipe.Flush();
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogDebug(ex, "Error reading from serial port");
+                Thread.Sleep(5000);
             }
         }
     }
@@ -102,14 +131,22 @@ public class Worker : BackgroundService
         {
             try
             {
+                VerifyNamedPipeConnection();
                 var bytes = _namedPipe.Read(buffer, 0, buffer.Length);
-                var data = Convert.ToHexString(buffer, 0, bytes);
-                _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}", bytes, data);
-                _serialPort.Write(buffer, 0, bytes);
+                if (bytes > 0)
+                {
+                    _namedPipeBytesRead += (ulong)bytes;
+                    var data = Convert.ToHexString(buffer, 0, bytes);
+                    _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}", bytes, data);
+
+                    VerifySerialPortConnection();
+                    _serialPort.Write(buffer, 0, bytes);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error reading from named pipe");
+                Thread.Sleep(5000);
             }
         }
     }
