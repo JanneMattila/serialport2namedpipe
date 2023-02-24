@@ -40,7 +40,7 @@ Home assistant COM 2 \\.\pipe\com2
 sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
 ```
 
-**Note:** COM 1 is used for serial console, so you need to use COM 2.
+**Note:** COM 1 *might* be used for serial console, so safer to use use COM 2.
 
 ### Links
 
