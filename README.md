@@ -22,7 +22,7 @@ Create COM port for virtual machine and map that to named pipe:
 
 ```powershell
 Set-VMFirmware –Vmname "home assistant" –EnableSecureBoot Off
-Set-VMComPort -VMName "home assistant" -Number 1 -Path \\.\pipe\com1
+Set-VMComPort -VMName "home assistant" -Number 2 -Path \\.\pipe\com2
 ```
 
 Validate the mapping:
@@ -32,13 +32,15 @@ Get-VMComPort -VMName "home assistant"
 
 VMName         Name  Path
 ------         ----  ----
-Home assistant COM 1 \\.\pipe\com1
-Home assistant COM 2
+Home assistant COM 1 
+Home assistant COM 2 \\.\pipe\com2
 ```
 
 ```powershell
 sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
 ```
+
+**Note:** COM 1 is used for serial console, so you need to use COM 2.
 
 ### Links
 

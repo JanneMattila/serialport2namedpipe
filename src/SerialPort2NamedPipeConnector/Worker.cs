@@ -1,5 +1,6 @@
 using System.IO.Pipes;
 using System.IO.Ports;
+using System.Text;
 
 namespace SerialPort2NamedPipeConnector;
 
@@ -109,11 +110,13 @@ public class Worker : BackgroundService
                 {
                     _serialPortBytesRead += (ulong)bytes;
                     var data = Convert.ToHexString(buffer, 0, bytes);
-                    _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}", bytes, data);
+                    var text = Encoding.UTF8.GetString(buffer, 0, bytes);
+                    _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}: {Text}", bytes, data, text);
 
                     VerifyNamedPipeConnection();
                     _namedPipe.Write(buffer, 0, bytes);
                     _namedPipe.Flush();
+                    _namedPipe.WaitForPipeDrain();
                 }
             }
             catch (Exception ex)
@@ -137,7 +140,8 @@ public class Worker : BackgroundService
                 {
                     _namedPipeBytesRead += (ulong)bytes;
                     var data = Convert.ToHexString(buffer, 0, bytes);
-                    _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}", bytes, data);
+                    var text = Encoding.UTF8.GetString(buffer, 0, bytes);
+                    _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}: {Text}", bytes, data, text);
 
                     VerifySerialPortConnection();
                     _serialPort.Write(buffer, 0, bytes);
