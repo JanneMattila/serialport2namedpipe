@@ -59,7 +59,7 @@ Home assistant COM 2 \\.\pipe\com2
 ```
 
 ```powershell
-sc.exe create binpath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
+sc.exe create "Serial port to named pipe connector" binPath="C:\Path\To\SerialPort2NamedPipeConnector.exe"
 ```
 
 **Note:** COM 1 *might* be used for serial console, so safer to use use COM 2.
