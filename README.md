@@ -1,6 +1,6 @@
 # Serial port to named pipe connector
 
-Serial port (e.g., COM3) to named pipe (e.g., \\\\.\\pipe\\\com2) connector
+Serial port (e.g., COM3) to named pipe (e.g., \\\\.\\pipe\\com2) connector
 
 ## Prior art
 
