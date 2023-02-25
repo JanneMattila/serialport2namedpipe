@@ -31,13 +31,13 @@ public class Worker : BackgroundService
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Serial port: {SerialPort}", _serialPortName);
-        _logger.LogInformation("Baud rate: {BaudRate}", _baudRate);
-        _logger.LogInformation("Named pipe: {NamedPipe}", _namedPipeName);
+        _logger.LogDebug("Serial port: {SerialPort}", _serialPortName);
+        _logger.LogDebug("Baud rate: {BaudRate}", _baudRate);
+        _logger.LogDebug("Named pipe: {NamedPipe}", _namedPipeName);
 
         foreach (var serialPortName in SerialPort.GetPortNames())
         {
-            _logger.LogInformation("Found serial port: {SerialPortName}", serialPortName);
+            _logger.LogDebug("Found serial port: {SerialPortName}", serialPortName);
         }
 
         _serialPort = new SerialPort
@@ -111,7 +111,7 @@ public class Worker : BackgroundService
                     _serialPortBytesRead += (ulong)bytes;
                     var data = Convert.ToHexString(buffer, 0, bytes);
                     var text = Encoding.UTF8.GetString(buffer, 0, bytes);
-                    _logger.LogInformation("Received {Bytes} bytes from serial port: {Data}: {Text}", bytes, data, text);
+                    _logger.LogTrace("Received {Bytes} bytes from serial port: {Data}: {Text}", bytes, data, text);
 
                     VerifyNamedPipeConnection();
                     _namedPipe.Write(buffer, 0, bytes);
@@ -141,7 +141,7 @@ public class Worker : BackgroundService
                     _namedPipeBytesRead += (ulong)bytes;
                     var data = Convert.ToHexString(buffer, 0, bytes);
                     var text = Encoding.UTF8.GetString(buffer, 0, bytes);
-                    _logger.LogInformation("Received {Bytes} bytes from named pipe: {Data}: {Text}", bytes, data, text);
+                    _logger.LogTrace("Received {Bytes} bytes from named pipe: {Data}: {Text}", bytes, data, text);
 
                     VerifySerialPortConnection();
                     _serialPort.Write(buffer, 0, bytes);

@@ -10,11 +10,33 @@ There are several projects that do similar thing:
 
 [Convey](https://github.com/weltling/convey)
 
-However, they do not support running them as Windows Service.
+[PipeToCom](https://github.com/albertjan/PipeToCom)
+
+However, they do not support running them as Windows Service or they have been abandoned by the maintainers.
 
 Main use case for this connector is to run
 [Home Assistant Operating System](https://www.home-assistant.io/installation/windows)
 in Hyper-V VM and connect it to serial devices (e.g., Zigbee dongle) on the host.
+
+Here is sequence diagram to illustrate how it works:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Zigbee dongle->>+Windows: USB Serial device (COM3)
+    Windows->>+SerialPort2NamedPipeConnector: Read from serial port
+    Note left of Hyper-V: Set-VMFirmware –Vmname "home assistant"<br/>–EnableSecureBoot Off
+    Note left of Hyper-V: Set-VMComPort -VMName "home assistant"<br/>-Number 2 -Path \\.\pipe\com2
+    SerialPort2NamedPipeConnector->>+Hyper-V: Write to named pipe<br/>\\.\pipe\com2
+    Hyper-V->>+Home Assistant OS: /dev/ttyS0
+    Home Assistant OS->>+Zigbee Home Automation: Read from serial port
+    Note right of Zigbee Home Automation: Home Assistant<br/>Integration
+    Zigbee Home Automation->>+Home Assistant OS: Write to serial port
+    Home Assistant OS->>+Hyper-V: /dev/ttyS0
+    Hyper-V->>+SerialPort2NamedPipeConnector: Read from named pipe<br/>\\.\pipe\com2
+    SerialPort2NamedPipeConnector->>+Windows: Write to serial port
+    Windows->>+Zigbee dongle: USB Serial device (COM3)
+```
 
 ## Installation
 
